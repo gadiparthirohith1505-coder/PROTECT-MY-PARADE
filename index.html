@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cupcake">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Protect My Parade</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease;
+            overflow: hidden; /* Hide scrollbars caused by animations */
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+        .centered-container {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- Weather Animation Styles --- */
+        .weather-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Sunny Animation */
+        .sunny { background: linear-gradient(to top, #90caf9, #047afb); }
+        .sun {
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            background: #FFDE00;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #FFDE00;
+            animation: spin 20s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Subtle floating particles for sunny days */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.7);
+            filter: blur(1px);
+            animation: floatParticle 12s ease-in-out infinite;
+        }
+        @keyframes floatParticle {
+            0% { transform: translateY(0) translateX(0); opacity: 0.5; }
+            50% { transform: translateY(-40px) translateX(20px); opacity: 0.9; }
+            100% { transform: translateY(0) translateX(0); opacity: 0.5; }
+        }
+
+        /* Cloudy Animation */
+        .cloudy { background: linear-gradient(to top, #bdc3c7, #2c3e50); }
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: move-cloud 25s linear infinite;
+        }
+        .cloud.one { top: 20%; left: -20%; width: 200px; height: 60px; }
+        .cloud.two { top: 40%; left: -30%; width: 300px; height: 90px; animation-duration: 35s; }
+        .cloud.three { top: 60%; left: -25%; width: 250px; height: 75px; animation-duration: 30s; }
+        @keyframes move-cloud { from { left: -30%; } to { left: 110%; } }
+        /* Fog layers for overcast */
+        .foggy { background: linear-gradient(to top, #cfd9df, #a6c0fe); }
+        .fog-layer {
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 50%;
+            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+            filter: blur(3px);
+            opacity: 0.4;
+            animation: driftFog 60s linear infinite;
+        }
+        .fog-layer.bottom { top: auto; bottom: 0; animation-duration: 80s; opacity: 0.5; }
+        @keyframes driftFog { from { transform: translateX(0); } to { transform: translateX(25%); } }
+        
+        /* Night Animation */
+        .night { background: linear-gradient(to top, #2c3e50, #0f2027); }
+        .moon {
+            position: absolute;
+            top: 15%;
+            right: 15%;
+            width: 100px;
+            height: 100px;
+            background: #f4f4f4;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f4f4f4, 0 0 40px #f4f4f4;
+        }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle { from { opacity: 0.5; } to { opacity: 1; transform: scale(1.2); } }
+
+
+        /* Rainy & Thunderstorm Animation */
+        .rainy, .rainy-night { background: linear-gradient(to top, #304352, #d7d2cc); }
+        .raindrop {
+            position: absolute;
+            bottom: 100%;
+            width: 1px;
+            height: 50px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.4));
+            animation: fall 1s linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh); }
+        }
+        /* Rain ripples */
+        .ripple {
+            position: absolute;
+            bottom: 1rem;
+            width: 80px;
+            height: 8px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            animation: rippleSpread 2.5s ease-out infinite;
+        }
+        @keyframes rippleSpread { 0% { transform: scaleX(0.3); opacity: 0.6; } 100% { transform: scaleX(1.4); opacity: 0; } }
+        .lightning {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            animation: flash 5s linear infinite;
+            animation-delay: 2s;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            1%, 4% { opacity: 1; }
+            2%, 5% { opacity: 0; }
+            3%, 6% { opacity: 1; }
+            7% { opacity: 0; }
+        }
+
+        /* Snow Animation */
+        .snowy { background: linear-gradient(to top, #a8c0ff, #3f2b96); }
+        .snowflake {
+            position: absolute;
+            top: -2%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0.9;
+            box-shadow: 0 0 6px rgba(255,255,255,0.8);
+            animation: fallSnow linear infinite;
+        }
+        @keyframes fallSnow {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); }
+            100% { transform: translateY(110vh) translateX(30px) rotate(360deg); }
+        }
+
+        /* Breezy leaves */
+        .leaf {
+            position: absolute;
+            top: -5%;
+            width: 12px;
+            height: 8px;
+            background: #ffcc66;
+            border-radius: 2px 50% 2px 50%;
+            transform: rotate(20deg);
+            opacity: 0.8;
+            animation: blowLeaf 10s linear infinite;
+        }
+        @keyframes blowLeaf {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(50vw, 50vh) rotate(180deg); }
+            100% { transform: translate(110vw, 105vh) rotate(360deg); }
+        }
+
+        /* Smooth crossfade */
+        .weather-background { transition: background 1s ease, filter 1s ease, opacity 0.6s ease; }
+        .weather-background.transitioning { opacity: 0.4; filter: saturate(0.9) contrast(1.05); }
+
+
+        /* Chatbot Styles */
+        #chat-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+        #chat-popup {
+            position: fixed;
+            bottom: 7rem;
+            right: 2rem;
+            width: 350px;
+            height: 500px;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform-origin: bottom right;
+        }
+        #chat-popup.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+        #mic-btn.listening {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 117, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 117, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 117, 255, 0); }
+        }
+
+        /* --- NEW AND UPDATED BOX STYLES --- */
+        .info-box {
+            position: fixed;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            color: #e5e7eb;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .info-box strong {
+            color: #ffffff;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        #solution-box {
+            top: 5rem;
+            left: 1rem;
+            font-size: 0.85rem;
+            max-width: 250px;
+        }
+        #solution-box strong {
+            font-size: 0.9rem;
+        }
+
+        #team-names-box {
+            bottom: 1rem;
+            left: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            max-width: 150px;
+            line-height: 1.4;
+        }
+        #team-names-box strong {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-base-100">
+
+    <div class="navbar bg-base-100/70 backdrop-blur-md fixed top-0 left-0 right-0 z-20 border-b border-base-200">
+        <div class="flex-1">
+            <a class="btn btn-ghost normal-case text-xl">Protect My Parade</a>
+        </div>
+        <div class="flex-none gap-2 pr-4">
+            <div class="badge badge-primary hidden sm:inline-flex" id="current-temp-badge">--°</div>
+            <button id="unit-toggle" class="btn btn-ghost btn-sm">°C / °F</button>
+            <label class="swap swap-rotate">
+                <input type="checkbox" id="theme-toggle" />
+                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0-1.41-1.41l-.71.71A1,1,0,0,0,5.64,7.05ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM20,12a1,1,0,0,0-1-1H18a1,1,0,0,0,0,2h1A1,1,0,0,0,20,12ZM17,5.64a1,1,0,0,0-.71-.29,1,1,0,0,0-.7.29l-.71.71a1,1,0,1,0,1.41,1.41l.71-.71A1,1,0,0,0,17,5.64Z"/></svg>
+                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22a10.14,10.14,0,0,0,9.57,9.57A8.14,8.14,0,0,1,12.14,19.69Z"/></svg>
+            </label>
+        </div>
+    </div>
+
+    <div id="weather-animation-bg" class="weather-background sunny">
+        <div class="sun"></div>
+    </div>
+
+    <div class="centered-container pt-24">
+        <div class="card w-full max-w-3xl bg-base-200/80 shadow-xl backdrop-blur-sm">
+            <div class="card-body p-6 sm:p-10 items-center text-center relative">
+                <div id="status" class="text-base-content/70 mb-4">Getting your location...</div>
+                <div id="main-content" class="space-y-6 w-full hidden">
+                    <h1 class="text-3xl md:text-4xl font-bold text-base-content">Protect My Parade</h1>
+                    <div id="location-section" class="space-y-4">
+                        <div id="location-display-container" class="flex items-center justify-center gap-2 hidden">
+                            <p id="location-display" class="text-xl font-medium text-primary rounded-lg p-2 bg-primary/10"></p>
+                            <button id="change-location-btn" class="btn btn-xs btn-ghost">Change</button>
+                        </div>
+                        <div id="manual-location-input" class="space-y-2 hidden">
+                            <p class="text-base-content/80">Please enter a city:</p>
+                            <input type="text" id="city-input" placeholder="e.g. Springfield" class="input input-bordered w-full">
+                            <button id="set-location-btn" class="btn btn-primary w-full">Find City</button>
+                        </div>
+                        <div id="city-selection-section" class="space-y-2 hidden">
+                             <p class="text-base-content/80">Did you mean?</p>
+                             <div id="city-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                             <button id="cancel-selection-btn" class="btn btn-sm btn-ghost w-full">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="sun-times-section" class="flex justify-around w-full mt-2 text-base-content/80 hidden">
+                        <p><strong>Sunrise:</strong> <span id="sunrise-time" class="font-semibold text-secondary">--:--</span></p>
+                        <p><strong>Sunset:</strong> <span id="sunset-time" class="font-semibold text-secondary">--:--</span></p>
+                    </div>
+                    <div id="date-section" class="space-y-4 hidden">
+                        <p class="text-base-content/80">Select a date for your event:</p>
+                        <input type="date" id="event-date" class="input input-bordered w-full text-center text-lg">
+                    </div>
+                    <div id="results-section" class="space-y-4 hidden">
+                        <p id="results-text" class="text-2xl font-semibold"></p>
+                        <div id="results-icon" class="text-6xl mx-auto w-20 h-20 flex items-center justify-center"></div>
+                        <div id="quick-actions" class="flex flex-wrap gap-2 justify-center">
+                            <button id="save-location-btn" class="btn btn-sm">Save Location</button>
+                            <button id="share-btn" class="btn btn-sm btn-ghost">Share</button>
+                            <button id="open-planner-btn" class="btn btn-sm btn-secondary">Trip Planner</button>
+                        </div>
+                        <div id="recommendation-section" class="alert shadow-lg hidden">
+                            <div>
+                                <span id="recommendation-text">Consider taking an umbrella just in case.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse collapse-arrow bg-base-100/50 mt-6 w-full">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        Helpline
+                    </div>
+                    <div class="collapse-content text-left"> 
+                        <p><strong>India (ISRO Helpline):</strong> <a href="tel:+91822172104" class="link-hover">+91-8-2217-2104</a></p>
+                        <p><strong>Other Countries:</strong> <a href="tel:+12023580001" class="link-hover">+1-202-358-0001</a></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-widget">
+        <button id="chat-open-btn" class="btn btn-primary btn-circle shadow-lg">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+        </button>
+        <div id="chat-popup" class="card bg-base-100 shadow-xl hidden">
+            <div class="card-body flex flex-col h-full">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 class="card-title">Weather Assistant</h2>
+                    <button id="chat-close-btn" class="btn btn-sm btn-circle">✕</button>
+                </div>
+                <div id="chat-messages" class="flex-grow overflow-y-auto pr-2 space-y-4 bg-base-200 p-4 rounded-lg">
+                    </div>
+                <div class="mt-4 flex gap-2 flex-shrink-0">
+                    <input type="text" id="chat-input" placeholder="Ask a question..." class="input input-bordered w-full" />
+                    <button id="chat-send-btn" class="btn btn-primary">Send</button>
+                    <button id="mic-btn" class="btn btn-secondary btn-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3> 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="trip-planner-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Trip Planner</h3>
+            <p class="py-2 text-base-content/70">Plan your outing with suggested items and best times.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="label"><span class="label-text">Start Date</span></label>
+                    <input id="trip-start" type="date" class="input input-bordered w-full" />
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">End Date</span></label>
+                    <input id="trip-end" type="date" class="input input-bordered w-full" />
+                </div>
+            </div>
+            <div class="mt-4 text-left space-y-2">
+                <div>
+                    <div class="font-semibold">Suggested Items</div>
+                    <ul id="trip-items" class="list-disc list-inside text-base-content/80"></ul>
+                </div>
+                <div>
+                    <div class="font-semibold">Best Hours</div>
+                    <div id="trip-hours" class="text-base-content/80"></div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn">Close</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <div id="solution-box" class="info-box">
+        <strong>Our Website's Solution:</strong>
+        Provides real-time rain probability forecasts to help you plan your outdoor events with confidence.
+    </div>
+
+    <div id="team-names-box" class="info-box">
+        <strong>Team Members:</strong>
+        Rohith<br>
+        Jithin<br>
+        Dhanush<br>
+        Karthik<br>
+        Banu<br>
+        Bhavani
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURATION ---
+            const API_BASE_URL = 'http://localhost:3000';
+            let temperatureUnit = localStorage.getItem('unit') || 'c'; // 'c' or 'f'
+
+            // --- THEME SWITCHER ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            const lightTheme = 'cupcake'; 
+            const darkTheme = 'dracula';
+            const setTheme = (theme) => {
+                htmlElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                themeToggle.checked = theme === darkTheme;
+            };
+            themeToggle.addEventListener('change', () => setTheme(themeToggle.checked ? darkTheme : lightTheme));
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setTheme(savedTheme || (prefersDark ? darkTheme : lightTheme));
+            
+            // --- WEATHER ANIMATION ---
+            const animationBg = document.getElementById('weather-animation-bg');
+            let currentSunTimes = { sunrise: null, sunset: null };
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const currentTempBadge = document.getElementById('current-temp-badge');
+            const unitToggleBtn = document.getElementById('unit-toggle');
+            const openPlannerBtn = document.getElementById('open-planner-btn');
+            const recommendationSection = document.getElementById('recommendation-section');
+            const recommendationText = document.getElementById('recommendation-text');
+            const saveLocationBtn = document.getElementById('save-location-btn');
+            const shareBtn = document.getElementById('share-btn');
+
+            const setWeatherAnimation = (condition) => {
+                animationBg.innerHTML = ''; // Clear previous animations
+                
+                const now = new Date();
+                const sunrise = currentSunTimes.sunrise ? new Date(currentSunTimes.sunrise) : null;
+                const sunset = currentSunTimes.sunset ? new Date(currentSunTimes.sunset) : null;
+                
+                const isDay = sunrise && sunset && now >= sunrise && now < sunset;
+
+                // subtle crossfade when switching
+                animationBg.classList.add('transitioning');
+                setTimeout(() => animationBg.classList.remove('transitioning'), 350);
+
+                if (isDay) {
+                     animationBg.className = `weather-background ${condition}`;
+                     if (condition === 'sunny') {
+                        const sun = document.createElement('div');
+                        sun.className = 'sun';
+                        animationBg.appendChild(sun);
+                        if (!prefersReducedMotion) {
+                            for (let i = 0; i < 18; i++) {
+                                const p = document.createElement('div');
+                                p.className = 'particle';
+                                p.style.left = `${Math.random()*100}%`;
+                                p.style.top = `${Math.random()*100}%`;
+                                p.style.animationDelay = `${Math.random()*4}s`;
+                                animationBg.appendChild(p);
+                            }
+                        }
+                     } else if (condition === 'cloudy' || condition === 'foggy') {
+                        ['one', 'two', 'three'].forEach(c => {
+                            const cloud = document.createElement('div');
+                            cloud.className = `cloud ${c}`;
+                            animationBg.appendChild(cloud);
+                        });
+                        if (condition === 'foggy' && !prefersReducedMotion) {
+                            ['', 'bottom'].forEach(pos => {
+                                const fog = document.createElement('div');
+                                fog.className = `fog-layer ${pos}`.trim();
+                                animationBg.appendChild(fog);
+                            });
+                        }
+                     }
+                } else { // It's night
+                    animationBg.className = 'weather-background night';
+                     if (condition !== 'rainy' && condition !== 'stormy' && condition !== 'snowy') { // Add night elements if not precipitating
+                        const moon = document.createElement('div');
+                        moon.className = 'moon';
+                        animationBg.appendChild(moon);
+                        for(let i = 0; i < 50; i++) {
+                            const star = document.createElement('div');
+                            star.className = 'star';
+                            star.style.top = `${Math.random() * 100}%`;
+                            star.style.left = `${Math.random() * 100}%`;
+                            star.style.animationDelay = `${Math.random()}s`;
+                            animationBg.appendChild(star);
+                        }
+                    }
+                }
+
+                // Precipitation and overlays
+                if (condition === 'rainy' || condition === 'stormy') {
+                     if(isDay) animationBg.classList.add('rainy');
+                     else animationBg.classList.add('rainy-night');
+                     const dropCount = prefersReducedMotion ? 20 : 70;
+                     for (let i = 0; i < dropCount; i++) {
+                        const drop = document.createElement('div');
+                        drop.className = 'raindrop';
+                        drop.style.left = `${Math.random() * 100}%`;
+                        drop.style.animationDelay = `${Math.random() * 2}s`;
+                        animationBg.appendChild(drop);
+                    }
+                    for (let i = 0; i < 4; i++) {
+                        const ripple = document.createElement('div');
+                        ripple.className = 'ripple';
+                        ripple.style.left = `${Math.random()*90 + 5}%`;
+                        ripple.style.animationDelay = `${Math.random()*3}s`;
+                        animationBg.appendChild(ripple);
+                    }
+                    if (condition === 'stormy' && !prefersReducedMotion) {
+                        const lightning = document.createElement('div');
+                        lightning.className = 'lightning';
+                        animationBg.appendChild(lightning);
+                    }
+                }
+                if (condition === 'snowy') {
+                    animationBg.className = 'weather-background snowy';
+                    const flakeCount = prefersReducedMotion ? 40 : 120;
+                    for (let i = 0; i < flakeCount; i++) {
+                        const flake = document.createElement('div');
+                        flake.className = 'snowflake';
+                        flake.style.left = `${Math.random()*100}%`;
+                        flake.style.animationDuration = `${6 + Math.random()*6}s`;
+                        flake.style.opacity = `${0.6 + Math.random()*0.4}`;
+                        animationBg.appendChild(flake);
+                    }
+                }
+                // Occasional breezy leaves
+                if (condition === 'sunny' && !prefersReducedMotion) {
+                    for (let i = 0; i < 8; i++) {
+                        const leaf = document.createElement('div');
+                        leaf.className = 'leaf';
+                        leaf.style.left = `${-10 - Math.random()*20}%`;
+                        leaf.style.animationDelay = `${Math.random()*6}s`;
+                        leaf.style.background = Math.random()>0.5 ? '#ffcc66' : '#88d498';
+                        animationBg.appendChild(leaf);
+                    }
+                }
+            };
+
+            // --- CHATBOT & VOICE ASSISTANT ---
+            const chatOpenBtn = document.getElementById('chat-open-btn');
+            const chatCloseBtn = document.getElementById('chat-close-btn');
+            const chatPopup = document.getElementById('chat-popup');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const chatSendBtn = document.getElementById('chat-send-btn');
+            const micBtn = document.getElementById('mic-btn');
+
+            let femaleVoice = null;
+
+            const loadVoices = () => {
+                const voices = speechSynthesis.getVoices();
+                femaleVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') && 
+                    (voice.name.includes('Female') || voice.name.includes('Samantha') || voice.name.includes('Google US English'))
+                ) || voices.find(voice => voice.lang.startsWith('en')); // Fallback
+            };
+            
+            speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+
+            const speak = (text) => {
+                speechSynthesis.cancel(); // Stop any previous speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                speechSynthesis.speak(utterance);
+            };
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+            } else {
+                console.log("Speech Recognition not supported.");
+                micBtn.disabled = true;
+            }
+            
+            const addMessageToChat = (text, sender) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat ${sender === 'user' ? 'chat-end' : 'chat-start'}`;
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'chat-bubble';
+                bubbleDiv.textContent = text;
+                messageDiv.appendChild(bubbleDiv);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            chatOpenBtn.addEventListener('click', () => {
+                const isNowHidden = chatPopup.classList.toggle('hidden');
+                if (!isNowHidden && !localStorage.getItem('greeted')) {
+                    const welcome = "Hello! I'm your voice-enabled weather assistant. How can I help you today?";
+                    addMessageToChat(welcome, 'bot');
+                    speak(welcome);
+                    localStorage.setItem('greeted', 'true');
+                }
+            });
+
+            chatCloseBtn.addEventListener('click', () => chatPopup.classList.add('hidden'));
+
+            // --- CORE APP LOGIC (WITH VOICE INTEGRATION) ---
+            const statusDiv = document.getElementById('status');
+            const mainContentDiv = document.getElementById('main-content');
+            const locationDisplayContainer = document.getElementById('location-display-container');
+            const locationDisplay = document.getElementById('location-display');
+            const manualLocationInputDiv = document.getElementById('manual-location-input');
+            const cityInput = document.getElementById('city-input');
+            const setLocationBtn = document.getElementById('set-location-btn');
+            const changeLocationBtn = document.getElementById('change-location-btn');
+            const citySelectionSection = document.getElementById('city-selection-section');
+            const cityListDiv = document.getElementById('city-list');
+            const cancelSelectionBtn = document.getElementById('cancel-selection-btn');
+            const dateSectionDiv = document.getElementById('date-section');
+            const eventDateInput = document.getElementById('event-date');
+            const resultsSectionDiv = document.getElementById('results-section');
+            const resultsText = document.getElementById('results-text');
+            const resultsIcon = document.getElementById('results-icon');
+            const sunTimesSection = document.getElementById('sun-times-section');
+            const sunriseTimeSpan = document.getElementById('sunrise-time');
+            const sunsetTimeSpan = document.getElementById('sunset-time');
+            
+            let userLocation = null;
+            let lastPrediction = null;
+
+            const formatTemp = (t) => temperatureUnit === 'c' ? `${Math.round(t)}°C` : `${Math.round((t*9)/5+32)}°F`;
+
+            const fetchCurrentWeather = async (location) => {
+                try {
+                    const unitParam = temperatureUnit === 'c' ? 'celsius' : 'fahrenheit';
+                    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current_weather=true&temperature_unit=${unitParam}`);
+                    const data = await res.json();
+                    if (data.current_weather && typeof data.current_weather.temperature !== 'undefined') {
+                        currentTempBadge.textContent = `${Math.round(data.current_weather.temperature)}°${temperatureUnit.toUpperCase()}`;
+                        currentTempBadge.classList.remove('hidden');
+                    }
+                } catch(e) { console.warn('Current weather fetch failed', e); }
+            };
+
+            unitToggleBtn.addEventListener('click', async () => {
+                temperatureUnit = temperatureUnit === 'c' ? 'f' : 'c';
+                localStorage.setItem('unit', temperatureUnit);
+                if (userLocation) { await fetchCurrentWeather(userLocation); }
+            });
+            
+            const getRainPredictionFromServer = async (location, dateString) => {
+                try {
+                    const url = `${API_BASE_URL}/weather?city=${encodeURIComponent(location.name)}&date=${dateString}&lat=${location.latitude}&lon=${location.longitude}`;
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Server responded with an error');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error("Failed to fetch prediction:", error);
+                    return { probability: -1, condition: 'error', message: "Could not connect to the backend server. Is it running?" };
+                }
+            };
+
+            const updateLocation = async (locationData) => {
+                userLocation = locationData;
+                locationDisplay.textContent = userLocation.name === 'Your Current Location' ? userLocation.name : `${userLocation.name}, ${userLocation.country}`;
+                statusDiv.textContent = 'Fetching sunrise/sunset times...';
+                
+                try {
+                    const sunResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locationData.latitude}&longitude=${locationData.longitude}&daily=sunrise,sunset&timezone=auto`);
+                    const sunData = await sunResponse.json();
+                    if (!sunData.daily || !sunData.daily.sunrise) throw new Error("Invalid sun data");
+
+                    currentSunTimes = { sunrise: sunData.daily.sunrise[0], sunset: sunData.daily.sunset[0] };
+                    sunriseTimeSpan.textContent = new Date(currentSunTimes.sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    sunsetTimeSpan.textContent = new Date(currentSunTimes.sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } catch(e) {
+                    console.error("Error fetching sun times", e);
+                    sunriseTimeSpan.textContent = "N/A";
+                    sunsetTimeSpan.textContent = "N/A";
+                }
+
+                fetchCurrentWeather(locationData);
+
+                statusDiv.classList.add('hidden');
+                mainContentDiv.classList.remove('hidden');
+                locationDisplayContainer.classList.remove('hidden');
+                sunTimesSection.classList.remove('hidden');
+                dateSectionDiv.classList.remove('hidden');
+                manualLocationInputDiv.classList.add('hidden');
+                citySelectionSection.classList.add('hidden');
+                
+                setTodayAsMinDate();
+                setWeatherAnimation('sunny');
+
+                // --- FIX APPLIED HERE ---
+                // 1. Set the date input's default value to today.
+                const today = new Date();
+                today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // Adjust for timezone
+                eventDateInput.value = today.toISOString().split('T')[0];
+
+                // 2. Automatically trigger the forecast for today.
+                handleManualRequest(); 
+                // --- END OF FIX ---
+            };
+            
+            const displayCityChoices = (cities) => {
+                cityListDiv.innerHTML = '';
+                cities.forEach(city => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-outline w-full text-left justify-start';
+                    let label = `${city.name}, ${city.country}`;
+                    if(city.admin1) { label = `${city.name}, ${city.admin1}, ${city.country}`;}
+                    button.textContent = label;
+                    button.addEventListener('click', () => {
+                        updateLocation(city);
+                    });
+                    cityListDiv.appendChild(button);
+                });
+                manualLocationInputDiv.classList.add('hidden');
+                citySelectionSection.classList.remove('hidden');
+            };
+
+            const handleCitySearch = async () => {
+                const cityName = cityInput.value.trim();
+                if (!cityName) return;
+                statusDiv.textContent = `Searching for ${cityName}...`;
+                statusDiv.classList.remove('hidden');
+                mainContentDiv.classList.add('hidden');
+                resultsSectionDiv.classList.add('hidden');
+                citySelectionSection.classList.add('hidden');
+
+
+                try {
+                    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=10&language=en&format=json`);
+                    const geoData = await geoResponse.json();
+                    statusDiv.classList.add('hidden');
+                    mainContentDiv.classList.remove('hidden');
+                    if (!geoData.results) {
+                         throw new Error(`No results found for "${cityName}". Please check the spelling.`);
+                    }
+                    if (geoData.results.length === 1) {
+                        updateLocation(geoData.results[0]);
+                    } else {
+                        displayCityChoices(geoData.results);
+                    }
+                } catch (error) {
+                    statusDiv.textContent = error.message;
+                }
+            };
+
+            const setTodayAsMinDate = () => { 
+                const today = new Date();
+                today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+                eventDateInput.min = today.toISOString().split('T')[0];
+            };
+            
+            const updateUIWithResults = (data) => {
+                resultsSectionDiv.classList.remove('hidden');
+                if (data.probability === -1) {
+                     resultsText.textContent = `Error: ${data.message}`;
+                     resultsText.className = 'text-2xl font-semibold text-error';
+                     resultsIcon.textContent = '⚠️';
+                     return;
+                }
+                let icon, color;
+                let derivedCondition = data.condition;
+
+                if (data.condition === 'rainy' && data.probability >= 80) { derivedCondition = 'stormy'; }
+                 else if (data.condition === 'rainy' && userLocation) {
+                    const month = new Date(eventDateInput.value || Date.now()).getMonth();
+                    const isWinter = (userLocation.latitude >= 0 && (month === 11 || month <= 1)) || (userLocation.latitude < 0 && (month >= 5 && month <= 7));
+                    if (isWinter) derivedCondition = 'snowy';
+                } else if (data.condition === 'cloudy' && data.probability < 35) { derivedCondition = 'foggy'; }
+                
+                if (derivedCondition === 'stormy' || derivedCondition === 'rainy') { icon = '☔'; color = 'text-error'; }
+                else if (derivedCondition === 'cloudy' || derivedCondition === 'foggy') { icon = '🌥️'; color = 'text-warning'; }
+                else if (derivedCondition === 'snowy') { icon = '❄️'; color = 'text-info'; }
+                else { icon = '☀️'; color = 'text-success'; }
+                
+                resultsText.textContent = `Probability: ${data.probability.toFixed(0)}% - ${data.message}`;
+                resultsText.className = `text-2xl font-semibold ${color}`;
+                resultsIcon.textContent = icon;
+                setWeatherAnimation(derivedCondition);
+                lastPrediction = { ...data, derivedCondition };
+
+                const shouldShowPrompt = derivedCondition === 'stormy' || derivedCondition === 'rainy' || derivedCondition === 'foggy' || derivedCondition === 'snowy' || data.probability >= 40;
+                if(shouldShowPrompt) {
+                    if (derivedCondition === 'foggy') recommendationText.textContent = 'Foggy conditions expected. Plan to drive carefully!';
+                    else if (derivedCondition === 'snowy') recommendationText.textContent = 'Snow expected. Remember to pack warm layers!';
+                    else recommendationText.textContent = 'Rain is likely. An umbrella would be a good idea!';
+                    recommendationSection.classList.remove('hidden');
+                } else {
+                    recommendationSection.classList.add('hidden');
+                }
+            };
+
+            const parseDateFromString = (text) => {
+                text = text.toLowerCase();
+                const today = new Date();
+                if (text.includes('tomorrow')) {
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                }
+                if (text.includes('today')) { return today.toISOString().split('T')[0]; }
+                if (text.includes('christmas')) { return `${today.getFullYear()}-12-25`; }
+                const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})|(\d{1,2}\/\d{1,2}\/\d{4})/);
+                if(dateMatch) return new Date(dateMatch[0]).toISOString().split('T')[0];
+                return null;
+            };
+
+            const processCommand = async (command) => {
+                command = command.toLowerCase();
+                addMessageToChat(command, 'user');
+
+                const cityMatch = command.split(' in ')[1];
+                if (!cityMatch) {
+                    const response = "Please specify a city, like 'weather in London tomorrow'.";
+                    addMessageToChat(response, 'bot');
+                    speak(response);
+                    return;
+                }
+                const cityName = cityMatch.split(' on ')[0].trim();
+
+                try {
+                    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`);
+                    const geoData = await geoResponse.json();
+                    
+                    if (!geoData.results || geoData.results.length === 0) {
+                        addMessageToChat("I couldn't find that city.", 'bot');
+                        speak("I couldn't find that city.");
+                        return;
+                    }
+
+                    let foundCity = geoData.results[0];
+                    let foundDate = parseDateFromString(command);
+
+                    await updateLocation(foundCity);
+
+                    if (foundDate) {
+                        const prediction = await getRainPredictionFromServer(foundCity, foundDate);
+                        updateUIWithResults(prediction);
+                        const response = `I've checked the prediction for ${foundCity.name} on ${foundDate}. ${prediction.message}`;
+                        addMessageToChat(response, 'bot');
+                        speak(response);
+                        eventDateInput.value = foundDate;
+                    } else {
+                        const response = `I found ${foundCity.name}. For which date would you like the forecast?`;
+                        addMessageToChat(response, 'bot');
+                        speak(response);
+                    }
+                } catch (e) {
+                    addMessageToChat("Sorry, I had trouble finding that. Please try again.", 'bot');
+                    speak("Sorry, I had trouble finding that. Please try again.");
+                }
+            };
+            
+            const handleManualRequest = async () => {
+                if (eventDateInput.value && userLocation) {
+                    const prediction = await getRainPredictionFromServer(userLocation, eventDateInput.value);
+                    updateUIWithResults(prediction);
+                }
+            };
+            
+            chatSendBtn.addEventListener('click', () => { if (chatInput.value) { processCommand(chatInput.value); chatInput.value = ''; } });
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && chatInput.value) { processCommand(chatInput.value); chatInput.value = ''; } });
+
+            if (recognition) {
+                micBtn.addEventListener('click', () => { recognition.start(); });
+                recognition.onstart = () => { micBtn.classList.add('listening', 'btn-error'); };
+                recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; processCommand(transcript); };
+                recognition.onerror = (event) => { console.error("Speech recognition error:", event.error); addMessageToChat(`Error with speech recognition: ${event.error}`, 'bot'); };
+                recognition.onend = () => { micBtn.classList.remove('listening', 'btn-error'); };
+            }
+
+            setLocationBtn.addEventListener('click', handleCitySearch);
+            cityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCitySearch(); });
+
+
+            changeLocationBtn.addEventListener('click', () => {
+                locationDisplayContainer.classList.add('hidden');
+                sunTimesSection.classList.add('hidden');
+                dateSectionDiv.classList.add('hidden');
+                resultsSectionDiv.classList.add('hidden');
+                manualLocationInputDiv.classList.remove('hidden');
+                cityInput.focus();
+            });
+
+            cancelSelectionBtn.addEventListener('click', () => {
+                citySelectionSection.classList.add('hidden');
+                if (userLocation) {
+                    locationDisplayContainer.classList.remove('hidden');
+                    sunTimesSection.classList.remove('hidden');
+                    dateSectionDiv.classList.remove('hidden');
+                } else { 
+                    manualLocationInputDiv.classList.remove('hidden');
+                }
+            });
+
+            eventDateInput.addEventListener('change', handleManualRequest);
+
+            saveLocationBtn.addEventListener('click', () => {
+                if (!userLocation || userLocation.name === 'Your Current Location') return;
+                const key = 'savedLocations';
+                const saved = JSON.parse(localStorage.getItem(key) || '[]');
+                if (!saved.find(c => c.name === userLocation.name && c.country === userLocation.country)) {
+                    saved.push({ name: userLocation.name, country: userLocation.country, latitude: userLocation.latitude, longitude: userLocation.longitude });
+                    localStorage.setItem(key, JSON.stringify(saved));
+                    saveLocationBtn.textContent = 'Saved!';
+                    saveLocationBtn.classList.add('btn-success');
+                    setTimeout(() => {
+                        saveLocationBtn.classList.remove('btn-success');
+                        saveLocationBtn.textContent = 'Save Location';
+                    }, 1500);
+                }
+            });
+
+            shareBtn.addEventListener('click', async () => {
+                if (!userLocation || !eventDateInput.value) {
+                    alert("Please select a location and date before sharing.");
+                    return;
+                }
+                const city = userLocation.name;
+                const date = eventDateInput.value;
+                const shareUrl = `${location.origin}${location.pathname}?city=${encodeURIComponent(city)}&date=${encodeURIComponent(date)}`;
+                const text = `Weather prediction for ${city} on ${date}`;
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: 'Protect My Parade', text, url: shareUrl });
+                    } else {
+                        await navigator.clipboard.writeText(shareUrl);
+                        shareBtn.textContent = 'Copied!';
+                        shareBtn.classList.add('btn-success');
+                        setTimeout(() => {
+                            shareBtn.classList.remove('btn-success');
+                            shareBtn.textContent = 'Share';
+                        }, 1500);
+                    }
+                } catch(e) { console.log('Share cancelled or failed'); }
+            });
+
+            if (openPlannerBtn) openPlannerBtn.addEventListener('click', () => document.getElementById('trip-planner-modal').showModal());
+
+            // --- Trip planner logic ---
+            const tripStartInput = document.getElementById('trip-start');
+            const tripEndInput = document.getElementById('trip-end');
+            const tripItemsList = document.getElementById('trip-items');
+            const tripHoursDiv = document.getElementById('trip-hours');
+
+            const computeItemsForCondition = (cond) => {
+                const base = ['Water bottle', 'Power bank', 'Snacks'];
+                if (cond === 'stormy' || cond === 'rainy') return [...base, 'Umbrella', 'Raincoat', 'Waterproof shoes'];
+                if (cond === 'snowy') return [...base, 'Warm jacket', 'Gloves', 'Beanie'];
+                if (cond === 'foggy' || cond === 'cloudy') return [...base, 'Light jacket'];
+                return [...base, 'Sunscreen', 'Sunglasses', 'Cap'];
+            };
+
+            const bestHoursFromSunTimes = (sunriseIso, sunsetIso) => {
+                if (!sunriseIso || !sunsetIso) return 'Daytime';
+                const sr = new Date(sunriseIso);
+                const ss = new Date(sunsetIso);
+                const morningStart = new Date(sr.getTime() + 60*60*1000);
+                const morningEnd = new Date(sr.getTime() + 3*60*60*1000);
+                const eveningStart = new Date(ss.getTime() - 3*60*60*1000);
+                const eveningEnd = new Date(ss.getTime() - 60*60*1000);
+                const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return `${fmt(morningStart)}–${fmt(morningEnd)} and ${fmt(eveningStart)}–${fmt(eveningEnd)}`;
+            };
+
+            const planTrip = async () => {
+                tripItemsList.innerHTML = '';
+                tripHoursDiv.textContent = '';
+                const cond = lastPrediction?.derivedCondition || 'sunny';
+                const items = computeItemsForCondition(cond);
+                items.forEach(i => { const li = document.createElement('li'); li.textContent = i; tripItemsList.appendChild(li); });
+                tripHoursDiv.textContent = bestHoursFromSunTimes(currentSunTimes.sunrise, currentSunTimes.sunset);
+            };
+
+            const plannerModal = document.getElementById('trip-planner-modal');
+            if (plannerModal) {
+                 const originalShowModal = plannerModal.showModal.bind(plannerModal);
+                 plannerModal.showModal = (...args) => { 
+                    tripStartInput.value = eventDateInput.value;
+                    tripEndInput.value = eventDateInput.value;
+                    originalShowModal(...args); 
+                    setTimeout(planTrip, 0); 
+                };
+                 tripStartInput.addEventListener('change', planTrip);
+                 tripEndInput.addEventListener('change', planTrip);
+            }
+            
+            // --- APP INITIALIZATION ---
+            const showManualInput = (message) => {
+                statusDiv.textContent = message;
+                mainContentDiv.classList.remove('hidden');
+                manualLocationInputDiv.classList.remove('hidden');
+                locationDisplayContainer.classList.add('hidden');
+            };
+
+            const initializeWithGeolocation = () => {
+                if (navigator.geolocation) {
+                    statusDiv.textContent = "Requesting your location...";
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            statusDiv.textContent = "Location found! Fetching details...";
+                            const { latitude, longitude } = position.coords;
+                            const locationData = { name: 'Your Current Location', country: '', latitude, longitude };
+                            await updateLocation(locationData);
+                        },
+                        (error) => {
+                            console.warn(`Geolocation error: ${error.message}`);
+                            showManualInput("Could not get your location. Please search for a city.");
+                        }
+                    );
+                } else {
+                    console.warn("Geolocation is not supported by this browser.");
+                    showManualInput("Geolocation not supported. Please search for a city.");
+                }
+            };
+            
+            const urlParams = new URLSearchParams(location.search);
+            const qCity = urlParams.get('city');
+            const qDate = urlParams.get('date');
+
+            if (qCity && qCity !== 'Your Current Location') {
+                statusDiv.textContent = `Loading data for ${qCity}...`;
+                fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(qCity)}&count=1&language=en&format=json`)
+                    .then(res => res.json())
+                    .then(async data => { 
+                        if (data.results && data.results.length > 0) { 
+                            await updateLocation(data.results[0]); 
+                            if (qDate) { 
+                                eventDateInput.value = qDate; 
+                                // Call handleManualRequest directly if a date is in the URL
+                                handleManualRequest();
+                            } 
+                        } else {
+                             showManualInput(`Could not find "${qCity}". Please search for a city.`);
+                        }
+                    }).catch(err => {
+                        console.error("Deep-link load failed:", err);
+                        showManualInput("Could not load location. Please search for a city.");
+                    });
+            } else {
+                initializeWithGeolocation();
+            }
+        });
+    </script>
+</body>
+</html>
