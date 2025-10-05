@@ -1,6 +1,6 @@
 Protect My Parade 🌦️ A dynamic, voice-enabled weather forecasting application that provides real-time rain probability to help you plan your outdoor events.
 
-[Live Deployed Website URL Here] | [Link to YouTube Demo Video Here]
+[Live Deployed Website URL:https://protect-my-parade.vercel.app/] | [Link to YouTube Demo Video Here]
 
 The Problem:
 
@@ -48,9 +48,9 @@ Git
 1. Clone the Repository
 First, clone the project from GitHub to your local machine.
 
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/gadiparthirohith1505-coder/PROTECT-MY-PARADE
 
-cd your-repository-name
+cd PROTECT MY PARADE
 
 2. Setup the Backend
 
