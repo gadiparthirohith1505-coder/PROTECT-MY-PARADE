@@ -41,9 +41,9 @@ Git
 1. Clone the Repository:
 First, clone the project from GitHub to your local machine.
 
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/gadiparthirohith1505-coder/PROTECT-MY-PARADE
 
-cd your-repository-name
+cd PROTECT MY PARADE
 
 2. Setup the Backend:
 You will need one terminal for the backend.
@@ -55,12 +55,15 @@ cd backend
 Create a virtual environment
 
 python -m venv venv
+
 source venv/bin/activate
+
 Note: On Windows, the activation command is venv\Scripts\activate
 
 Install dependencies
 
 pip install -r requirements.txt
+
 Run the Flask server
 
 python app.py
@@ -73,6 +76,7 @@ You will need a second, separate terminal for the frontend.
 Open a new terminal and navigate to the project's root folder again.
 
 Run the Frontend with Live Server
+
 The easiest way to run the index.html file is with the "Live Server" extension in VS Code.
 
 Open the project folder in VS Code.
